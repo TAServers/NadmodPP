@@ -65,7 +65,7 @@ if not NADMOD.Props then
 	CPPI = {}
 
 	-- Copy over default settings if they aren't present in the disk's PPConfig
-	for k, v in pairs({ toggle = true, use = false, adminall = true, autocdp = 0, autocdpadmins = false }) do
+	for k, v in pairs({ toggle = true, use = false, autocdp = 0, autocdpadmins = false }) do
 		if NADMOD.PPConfig[k] == nil then
 			NADMOD.PPConfig[k] = v
 		end
@@ -243,10 +243,6 @@ function NADMOD.PlayerCanTouch(ply, ent)
 
 	-- Ownerless props can be touched by all
 	if NADMOD.Props[index].Name == "O" then
-		return true
-	end
-	-- Admins can touch anyones props + world
-	if NADMOD.PPConfig["adminall"] and NADMOD.IsPPAdmin(ply) then
 		return true
 	end
 	-- Players can touch their own props and friends
@@ -694,13 +690,6 @@ concommand.Add("npp_refreshfriends", function(ply, _cmd, _args)
 	if NADMOD.Users[ply:SteamID()] then
 		friends = table.Copy(NADMOD.Users[ply:SteamID()].Friends) or {}
 	end
-	if NADMOD.PPConfig["adminall"] then
-		for _, v in pairs(player.GetAll()) do
-			if NADMOD.IsPPAdmin(v) then
-				friends[v:SteamID()] = true
-			end
-		end
-	end
 	net.Start("nadmod_ppfriends")
 	net.WriteTable(friends)
 	net.Send(ply)
@@ -721,9 +710,7 @@ net.Receive("nadmod_ppfriends", function(_len, ply)
 	end
 
 	for steamid, bool in pairs(net.ReadTable()) do
-		if
-			players[steamid] and (not bool or not (NADMOD.IsPPAdmin(players[steamid]) and NADMOD.PPConfig["adminall"]))
-		then -- Users may not add admins to their friends list
+		if players[steamid] then -- Users may not add admins to their friends list
 			if bool then
 				outtab[steamid] = true
 			else

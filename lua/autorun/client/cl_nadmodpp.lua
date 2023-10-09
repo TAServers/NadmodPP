@@ -60,10 +60,6 @@ function NADMOD.PlayerCanTouch(ply, ent)
 	if PropNames[index] == "Ownerless" then
 		return true
 	end
-	-- Admins can touch anyones props + world
-	if NADMOD.PPConfig["adminall"] and NADMOD.IsPPAdmin(ply) then
-		return true
-	end
 	-- Players can touch their own props
 	local plySteam = ply:SteamID()
 	if Props[index] == plySteam then
@@ -227,7 +223,6 @@ function NADMOD.AdminPanel(Panel, runByNetReceive)
 	Panel:SetName("NADMOD PP Admin Panel")
 
 	Panel:CheckBox("Main PP Power Switch", "npp_toggle")
-	Panel:CheckBox("Admins can touch anything", "npp_adminall")
 	local use_protection = Panel:CheckBox("Use (E) Protection", "npp_use")
 	use_protection:SetTooltip("Stop nonfriends from entering vehicles, pushing buttons/doors")
 
