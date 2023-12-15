@@ -562,10 +562,7 @@ function NADMOD.CleanName(ply, _cmd, _args, fullstr)
 end
 concommand.Add("nadmod_cleanname", NADMOD.CleanName)
 
-function NADMOD.CDP(ply, _cmd, _args)
-	if ply:IsValid() and not NADMOD.IsPPAdmin(ply) then
-		return
-	end
+function NADMOD.CDP(_ply, _cmd, _args)
 	local count = 0
 	for _, v in pairs(NADMOD.Props) do
 		if not v.Ent:IsValid() then
