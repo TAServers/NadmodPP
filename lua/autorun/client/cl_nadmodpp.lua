@@ -296,11 +296,24 @@ net.Receive("nadmod_ppfriends", function()
 end)
 
 concommand.Add("npp_applyfriends", function()
+	local networkableFriends = {}
 	for _, tar in pairs(player.GetAll()) do
-		NADMOD.Friends[tar:SteamID()] = GetConVar("npp_friend_" .. tar:SteamID64bot()):GetBool()
+		local steamId = tar:SteamID()
+		local isFriendConVar = GetConVar("npp_friend_" .. tar:SteamID64bot())
+		local isFriend = isFriendConVar and isFriendConVar:GetBool()
+
+		NADMOD.Friends[steamId] = isFriend
+
+		if isFriend then
+			table.insert(networkableFriends, steamId)
+		end
 	end
+
 	net.Start("nadmod_ppfriends")
-	net.WriteTable(NADMOD.Friends)
+	net.WriteUInt(#networkableFriends, 8)
+	for _, friendSteamId in ipairs(networkableFriends) do
+		net.WriteString(friendSteamId)
+	end
 	net.SendToServer()
 end)
 
