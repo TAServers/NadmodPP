@@ -691,30 +691,29 @@ concommand.Add("npp_refreshfriends", function(ply, _cmd, _args)
 	net.WriteTable(friends)
 	net.Send(ply)
 end)
+
 net.Receive("nadmod_ppfriends", function(_len, ply)
 	if not ply:IsValid() then
 		return
 	end
-	if not NADMOD.Users[ply:SteamID()] then
-		NADMOD.Users[ply:SteamID()] = { Rank = 1 }
-	end
-	NADMOD.Users[ply:SteamID()].Friends = NADMOD.Users[ply:SteamID()].Friends or {}
-	local outtab = NADMOD.Users[ply:SteamID()].Friends
+
+	NADMOD.Users[ply:SteamID()] = NADMOD.Users[ply:SteamID()] or { Rank = 1 }
+	local userFriendsTable = {}
+	NADMOD.Users[ply:SteamID()].Friends = userFriendsTable
 
 	local players = {}
 	for _, v in pairs(player.GetAll()) do
-		players[v:SteamID()] = v
+		players[v:SteamID()] = true
 	end
 
-	for steamid, bool in pairs(net.ReadTable()) do
-		if players[steamid] then -- Users may not add admins to their friends list
-			if bool then
-				outtab[steamid] = true
-			else
-				outtab[steamid] = nil
-			end -- Don't bother storing falses
+	for _ = 1, net.ReadUInt(8) do
+		local steamId = net.ReadString()
+
+		if players[steamId] then
+			userFriendsTable[steamId] = true
 		end
 	end
+
 	NADMOD.Save()
 	NADMOD.Notify(ply, "Friends received!")
 end)
